@@ -85,15 +85,10 @@ app.put("/todos/:id", (req, res) => {
     const { username } = req.headers;
     const { id } = req.params;
 
-    ToDoUser.findOne({username: username}, (erro, dados) => {
-        if (!erro) {
-            // res.json(dados.todos)
-            dados.todos.findOne({id: id}, (erro, dadosTodo)=> {
-                if(!erro){
-                    res.json(dadosTodo)
-                }
-            })
-        }
+    ToDoUser.findOne({username: username}, (err, modificado) => {
+        // res.json(modificado.todos)
+        const collection = modificado.todos
+        res.send(collection[3].id)
     })
 
 
