@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const { v4 : uuidv4 } = require('uuid')
 const mongoose = require('mongoose')
-const mongodb = require('mongodb')
+const mongodb = require('mongodb');
+const res = require('express/lib/response');
 require('dotenv').config();
 const URL = process.env.MONGO_URI;
 mongoose.connect(URL, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -87,31 +88,14 @@ app.put("/todos/:id", (req, res) => {
     const { username } = req.headers;
     const { id } = req.params;
 
-    ToDoUser.findOne({username: username}, (err, modificado) => {
-        if (!err) {
+    const filter = { name: username, "todos.id": id };
+    const update = { title: title, deadline: deadline };
 
-            console.log("ok")
-            const listTodos = modificado.todos
+    ToDoUser.findOneAndUpdate(filter, update, { returnOriginal: false });
+    
+    res.send("ok" + id + title + deadline)
 
-
-            for(let i=0; i<listTodos.length; i++) {
-                if(listTodos[i].id === id) {
-
-                    console.log(listTodos[i].title)
-                    listTodos[i].title = title
-                    listTodos[i].deadline = deadline
-                   
-                    res.json(listTodos[i])
-
-                }
-            }
-
-
-
-            // res.json(listTodos[1].id)
-        }
-        modificado.save()
-    })
+    // res.json({id: id, title: title, deadline: deadline})
 })
 
 
