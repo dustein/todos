@@ -3,7 +3,9 @@ const app = express();
 const { v4 : uuidv4 } = require('uuid')
 const mongoose = require('mongoose')
 const mongodb = require('mongodb')
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+require('dotenv').config();
+const URL = process.env.MONGO_URI;
+mongoose.connect(URL, { useNewUrlParser: true, useUnifiedTopology: true })
 
 app.use(express.json());
 
@@ -86,22 +88,32 @@ app.put("/todos/:id", (req, res) => {
     const { id } = req.params;
 
     ToDoUser.findOne({username: username}, (err, modificado) => {
-        // res.json(modificado.todos)
-        const collection = modificado.todos
-        res.send(collection[3].id)
+        if (!err) {
+
+            console.log("ok")
+            const listTodos = modificado.todos
+
+
+            for(let i=0; i<listTodos.length; i++) {
+                if(listTodos[i].id === id) {
+
+                    console.log(listTodos[i].title)
+                    listTodos[i].title = title
+                    listTodos[i].deadline = deadline
+                   
+                    res.json(listTodos[i])
+
+                }
+            }
+
+
+
+            // res.json(listTodos[1].id)
+        }
+        modificado.save()
     })
-
-
-
-    //     ToDoUser.findOne({id: id}, (erro, dados) => {
-    //     if (!erro) {
-    //         res.json(dados)
-    //         // dados.save()
-    //     }
-    // })
-
-    // res.send("funcionando PUT" + id)
-
-
 })
-app.listen(3030);
+
+
+
+app.listen(3030, ()=> {console.log("Servidor ATIVO !")});
