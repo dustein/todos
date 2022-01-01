@@ -126,8 +126,27 @@ app.patch("/todos/:id/done", (req, res)=>{
 
 })
 
+//deletar ToDo selecionado
+app.delete("/todos/:id", (req, res)=>{
+    const { username } = req.headers;
+    const { id } = req.params;
 
+    ToDoUser.findOne({username: username}, (error, action)=>{
+        if(!error){
+            action.todos.filter(
+                selected => {
+                    if(selected.id === id){
+                        const toDel = action.todos.indexOf(selected)
+                        action.todos.splice(toDel, 1)
+                        action.save()
+                    }
+                })
+            // action.save()
+            res.json(action)
+        }
+    })
 
+})
 
 
 
