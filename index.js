@@ -46,7 +46,20 @@ async function checkUser(req, res, next) {
         return next()
     }
 }
+//middleware para evitar user duplicado
+async function checkUserAlready(req, res, next) {
+    const { username } = req.body;
 
+    const userFind = await ToDoUser.exists({username: username})
+    console.log(userFind)
+    if(userFind === true) {
+        console.log(username)
+        res.json({error: "User ALREADY EXISTS !"})
+    } else {
+        req.username = username
+        return next()
+    }
+}
 
 //lisa todos os users
 app.get("/", (req, res)=>{
@@ -57,8 +70,10 @@ app.get("/", (req, res)=>{
     });
     
 })
+
 //cria novo user
-app.post("/user", (req, res) => {
+app.post("/user", checkUserAlready, (req, res) => {
+    
     const user = new ToDoUser({    
         id: uuidv4(),
         name: req.body.name,
@@ -82,7 +97,7 @@ app.get("/todos", checkUser, (req, res) => {
  
 )
 //cria novo ToDo para um username
-app.post("/todos", (req, res) => {
+app.post("/todos", checkUser, (req, res) => {
     const { title, deadline } = req.body;
     const { username } = req.headers;
 
@@ -104,7 +119,7 @@ app.post("/todos", (req, res) => {
 })
 
 //altera title e deadline de uma ToDo
-app.put("/todos/:id", (req, res) => {
+app.put("/todos/:id", checkUser, (req, res) => {
     const { title, deadline } = req.body;
     const { username } = req.headers;
     const { id } = req.params;
@@ -125,7 +140,7 @@ app.put("/todos/:id", (req, res) => {
 })
 
 //marcar ToDo selecionado como done
-app.patch("/todos/:id/done", (req, res)=>{
+app.patch("/todos/:id/done", checkUser, (req, res)=>{
     const { username } = req.headers;
     const { id } = req.params;
 
@@ -145,7 +160,7 @@ app.patch("/todos/:id/done", (req, res)=>{
 })
 
 //deletar ToDo selecionado
-app.delete("/todos/:id", (req, res)=>{
+app.delete("/todos/:id", checkUser, (req, res)=>{
     const { username } = req.headers;
     const { id } = req.params;
 
