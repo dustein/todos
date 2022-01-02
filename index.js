@@ -32,6 +32,26 @@ const userSchema = new Schema({
 const ToDos = mongoose.model('Todos', todoSchema);
 const ToDoUser = mongoose.model('ToDoUser', userSchema);
 
+//middleware para checar se o user existe
+function checkUser(req, res, next) {
+    const { username } = req.headers;
+
+    // const userFound = ToDoUser.findOne({username: username}, (erro, dados) => {
+    //     if (!erro) {            
+    //         return dados
+    //     }
+    // })
+    const userFound = ""
+
+    if(!userFound) {
+        res.json({message: "Error. User do not exists"})
+    }
+
+    req.username = userFound
+    // res.send("middleware")
+    return next()
+}
+
 //lisa todos os users
 app.get("/", (req, res)=>{
     ToDoUser.find({}, (error, data) =>{
@@ -54,15 +74,18 @@ app.post("/user", (req, res) => {
     res.status(201).json(user)   
 })
 //lista ToDos de um username
-app.get("/todos", (req, res) => {
-    const { username } = req.headers;
+app.get("/todos", checkUser, (req, res) => {
+    const { username } = req;
     
-    ToDoUser.findOne({username: username}, (erro, dados) => {
-        if (!erro) {            
-            res.json(dados.todos)
-        }
-    })
-})
+    res.json(username)
+    // ToDoUser.findOne({username: username}, (erro, dados) => {
+    //     if (!erro) {            
+    //         res.json(dados.todos)
+    //     }
+    // })
+}
+ 
+)
 //cria novo ToDo para um username
 app.post("/todos", (req, res) => {
     const { title, deadline } = req.body;
