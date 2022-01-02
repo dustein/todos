@@ -33,24 +33,20 @@ const ToDos = mongoose.model('Todos', todoSchema);
 const ToDoUser = mongoose.model('ToDoUser', userSchema);
 
 //middleware para checar se o user existe
-function checkUser(req, res, next) {
+async function checkUser(req, res, next) {
     const { username } = req.headers;
 
-    // const userFound = ToDoUser.findOne({username: username}, (erro, dados) => {
-    //     if (!erro) {            
-    //         return dados
-    //     }
-    // })
-    const userFound = ""
-
-    if(!userFound) {
-        res.json({message: "Error. User do not exists"})
+    const userFind = await ToDoUser.exists({username: username})
+    console.log(userFind)
+    if(userFind === false) {
+        console.log(username)
+        res.json({error: "User DO NOT exists !"})
+    } else {
+        req.username = username
+        return next()
     }
-
-    req.username = userFound
-    // res.send("middleware")
-    return next()
 }
+
 
 //lisa todos os users
 app.get("/", (req, res)=>{
@@ -77,12 +73,11 @@ app.post("/user", (req, res) => {
 app.get("/todos", checkUser, (req, res) => {
     const { username } = req;
     
-    res.json(username)
-    // ToDoUser.findOne({username: username}, (erro, dados) => {
-    //     if (!erro) {            
-    //         res.json(dados.todos)
-    //     }
-    // })
+    ToDoUser.findOne({username: username}, (erro, dados) => {
+        if (!erro) {            
+            res.json(dados.todos)
+        }
+    })
 }
  
 )
